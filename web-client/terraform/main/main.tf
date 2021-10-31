@@ -238,3 +238,16 @@ resource "aws_route53_health_check" "status_health_check" {
   search_string      = "false"                                 # Search for any JSON property returning "false"
   regions            = ["us-east-1", "us-west-1", "us-west-2"] # Minimum of three regions required
 }
+
+
+resource "aws_route53_health_check" "api_health_check" {
+  fqdn               = "api.${var.dns_domain}"
+  port               = 443
+  type               = "HTTPS_STR_MATCH"
+  resource_path      = "/"
+  failure_threshold  = "3"
+  request_interval   = "30"
+  invert_healthcheck = true
+  search_string      = "false"                                 # Search for any JSON property returning "false"
+  regions            = ["us-east-1", "us-west-1", "us-west-2"] # Minimum of three regions required
+}
