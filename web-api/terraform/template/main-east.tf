@@ -166,7 +166,7 @@ data "archive_file" "zip_seal_in_lower" {
 }
 
 resource "null_resource" "seal_in_lower_east_object" {
-  count      = var.lower_env_account_id == data.aws_caller_identity.current.account_id ? data.aws_s3_bucket_object.seal_in_lower_blue_east_object.etag : ""
+  count      = var.lower_env_account_id == data.aws_caller_identity.current.account_id ? 1 : 0
   depends_on = [aws_s3_bucket.api_lambdas_bucket_east]
   provisioner "local-exec" {
     command = "aws s3 cp ${data.archive_file.zip_seal_in_lower.output_path} s3://${aws_s3_bucket.api_lambdas_bucket_east.id}/seal_in_lower_${var.deploying_color}.js.zip"
