@@ -5,6 +5,9 @@ const {
   migrateItems: migration0003,
 } = require('./migrations/0003-case-has-sealed-documents');
 const {
+  migrateItems: migration0004,
+} = require('./migrations/0004-missing-case-practitioners');
+const {
   migrateItems: validationMigration,
 } = require('./migrations/0000-validate-all-items');
 const { chunk } = require('lodash');
@@ -35,6 +38,11 @@ const migrateRecords = async ({
   if (!ranMigrations['0003-case-has-sealed-documents.js']) {
     applicationContext.logger.debug('about to run migration 0003');
     items = await migration0003(items, documentClient);
+  }
+
+  if (!ranMigrations['0004-missing-case-practitioners.js']) {
+    applicationContext.logger.debug('about to run migration 0004');
+    items = await migration0004(items, documentClient);
   }
 
   applicationContext.logger.debug('about to run validation migration');
@@ -69,7 +77,7 @@ const processItems = async ({ documentClient, items, ranMigrations }) => {
             .catch(e => {
               if (e.message.includes('The conditional request failed')) {
                 console.log(
-                  `The item of ${item.pk} ${item.sk} alread existed in the destination table, probably due to a live migration.  Skipping migration for this item.`,
+                  `The item of ${item.pk} ${item.sk} already existed in the destination table, probably due to a live migration.  Skipping migration for this item.`,
                 );
               } else {
                 throw e;
@@ -139,6 +147,7 @@ exports.handler = async event => {
 
   const ranMigrations = {
     ...(await hasMigrationRan('0003-case-has-sealed-documents.js')),
+    ...(await hasMigrationRan('0004-missing-case-practitioners.js')),
   };
 
   await scanTableSegment(segment, totalSegments, ranMigrations);
